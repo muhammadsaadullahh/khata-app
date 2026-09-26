@@ -13,7 +13,7 @@ import java.net.URI;
 public class DynamoDbConfig {
 
     @Bean
-    public DynamoDbClient dynamoDbClient(@Value("${aws.region:eu-north-1}") String region,
+    public DynamoDbClient dynamoDbClient(@Value("${aws.region}") String region,
                                          @Value("${aws.dynamodb.endpoint:}") String endpoint) {
         var builder = DynamoDbClient.builder()
                 .region(Region.of(region))

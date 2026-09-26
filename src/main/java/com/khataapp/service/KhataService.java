@@ -7,6 +7,7 @@ import com.khataapp.model.ItemType;
 import com.khataapp.model.KhataItem;
 import com.khataapp.model.TransactionType;
 import com.khataapp.repository.KhataRepository;
+import com.khataapp.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -19,14 +20,14 @@ public class KhataService {
 
     public KhataService(KhataRepository repository) { this.repository = repository; }
 
-    public TransactionResponse create(CreateTransactionRequest request) {
+    public TransactionResponse create(String userId, CreateTransactionRequest request) {
         String id = UUID.randomUUID().toString();
         String createdAt = Instant.now().toString();
         KhataItem item = new KhataItem();
-        item.setPk("USER#" + request.userId());
+        item.setPk("USER#" + userId);
         item.setSk("TXN#" + createdAt + "#" + id);
         item.setItemType(ItemType.TRANSACTION.name());
-        item.setUserId(request.userId());
+        item.setUserId(userId);
         item.setTransactionId(id);
         item.setPartyName(request.partyName());
         item.setTransactionType(request.type().name());
@@ -49,6 +50,12 @@ public class KhataService {
             else cashOut = cashOut.add(item.getAmount());
         }
         return new SummaryResponse(cashIn, cashOut, cashIn.subtract(cashOut));
+    }
+
+    public void delete(String userId, String transactionId) {
+        KhataItem item = repository.findTransactionById(userId, transactionId)
+                .orElseThrow(() -> new NotFoundException("Transaction was not found"));
+        repository.delete(item);
     }
 
     private TransactionResponse toResponse(KhataItem item) {

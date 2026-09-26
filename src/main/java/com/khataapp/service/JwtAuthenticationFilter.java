@@ -1,6 +1,7 @@
 package com.khataapp.service;
 
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,8 +16,12 @@ import java.util.Collections;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
+    private final com.khataapp.repository.KhataRepository repository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) { this.jwtService = jwtService; }
+    public JwtAuthenticationFilter(JwtService jwtService, com.khataapp.repository.KhataRepository repository) {
+        this.jwtService = jwtService;
+        this.repository = repository;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -25,10 +30,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 String subject = jwtService.subject(header.substring(7));
-                if (subject != null && !subject.isBlank()) {
+                if (subject != null && !subject.isBlank() && repository.findUserById(subject).isPresent()) {
                     SecurityContextHolder.getContext().setAuthentication(
                             new UsernamePasswordAuthenticationToken(subject, null, Collections.emptyList()));
                 }
+            } catch (ExpiredJwtException ex) {
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/problem+json");
+                response.getWriter().write(
+                        "{\"type\":\"about:blank\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Token has expired\"}");
+                return;
             } catch (JwtException | IllegalArgumentException ignored) {
                 SecurityContextHolder.clearContext();
             }

@@ -21,8 +21,8 @@ public class KhataController {
     @ResponseStatus(HttpStatus.CREATED)
     public TransactionResponse create(@Valid @RequestBody CreateTransactionRequest request,
                                       Authentication authentication) {
-        requireOwner(authentication, request.userId());
-        return service.create(request);
+        requireAuthenticated(authentication);
+        return service.create(authentication.getName(), request);
     }
 
     @GetMapping("/{userId}")
@@ -37,9 +37,24 @@ public class KhataController {
         return service.summary(userId);
     }
 
+    @DeleteMapping("/{userId}/{transactionId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String userId,
+                       @PathVariable String transactionId,
+                       Authentication authentication) {
+        requireOwner(authentication, userId);
+        service.delete(userId, transactionId);
+    }
+
     private void requireOwner(Authentication authentication, String userId) {
-        if (authentication == null || !userId.equals(authentication.getName())) {
+        if (authentication == null || !authentication.isAuthenticated() || !userId.equals(authentication.getName())) {
             throw new org.springframework.security.access.AccessDeniedException("User does not own this khata");
+        }
+    }
+
+    private void requireAuthenticated(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new org.springframework.security.access.AccessDeniedException("Authentication is required");
         }
     }
 }

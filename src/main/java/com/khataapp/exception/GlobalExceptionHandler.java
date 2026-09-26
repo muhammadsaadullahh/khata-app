@@ -37,4 +37,9 @@ public class GlobalExceptionHandler {
     public ProblemDetail forbidden(AccessDeniedException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
     }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ProblemDetail notFound(NotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }

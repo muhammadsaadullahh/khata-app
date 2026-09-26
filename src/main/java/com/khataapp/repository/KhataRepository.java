@@ -8,6 +8,8 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +18,7 @@ public class KhataRepository {
     private final DynamoDbTable<KhataItem> table;
 
     public KhataRepository(DynamoDbEnhancedClient client,
-                           @Value("${aws.dynamodb.table-name:Khataapp}") String tableName) {
+                           @Value("${aws.dynamodb.table-name}") String tableName) {
         this.table = client.table(tableName, TableSchema.fromBean(KhataItem.class));
     }
 
@@ -26,26 +28,33 @@ public class KhataRepository {
     }
 
     public KhataItem saveUser(KhataItem user) {
-        table.putItem(user);
         KhataItem usernameLookup = new KhataItem();
         usernameLookup.setPk("USERNAME#" + user.getUsername());
         usernameLookup.setSk("USER");
         usernameLookup.setItemType(ItemType.USER_LOOKUP.name());
         usernameLookup.setUserId(user.getUserId());
         usernameLookup.setUsername(user.getUsername());
-        table.putItem(usernameLookup);
+        try {
+            table.putItem(r -> r.item(usernameLookup)
+                    .conditionExpression(Expression.builder()
+                            .expression("attribute_not_exists(PK)")
+                            .build()));
+        } catch (ConditionalCheckFailedException ex) {
+            throw new com.khataapp.exception.ConflictException("Username is already registered");
+        }
+        table.putItem(user);
         return user;
     }
 
     public Optional<KhataItem> findUserByUsername(String username) {
-        return table.query(r -> r.queryConditional(
-                        software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo(
-                                Key.builder().partitionValue("USERNAME#" + username).build())))
-                .items().stream()
-                .filter(item -> ItemType.USER_LOOKUP.name().equals(item.getItemType()))
-                .map(item -> findUserById(item.getUserId()).orElse(null))
-                .filter(java.util.Objects::nonNull)
-                .findFirst();
+        KhataItem lookup = table.getItem(Key.builder()
+                .partitionValue("USERNAME#" + username)
+                .sortValue("USER")
+                .build());
+        if (lookup == null || !ItemType.USER_LOOKUP.name().equals(lookup.getItemType())) {
+            return Optional.empty();
+        }
+        return findUserById(lookup.getUserId());
     }
 
     public Optional<KhataItem> findUserById(String userId) {
@@ -58,10 +67,29 @@ public class KhataRepository {
 
     public List<KhataItem> findTransactionsByUserId(String userId) {
         return table.query(r -> r.queryConditional(
-                        software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo(
-                                Key.builder().partitionValue("USER#" + userId).build())))
+                        software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.sortBeginsWith(
+                                Key.builder().partitionValue("USER#" + userId).sortValue("TXN#").build())))
                 .items().stream()
-                .filter(item -> "TRANSACTION".equals(item.getItemType()))
                 .toList();
+    }
+
+    public Optional<KhataItem> findTransactionById(String userId, String transactionId) {
+        return table.query(r -> r.queryConditional(
+                        software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.sortBeginsWith(
+                                Key.builder().partitionValue("USER#" + userId).sortValue("TXN#").build()))
+                .filterExpression(software.amazon.awssdk.enhanced.dynamodb.Expression.builder()
+                        .expression("transactionId = :transactionId")
+                        .expressionValues(java.util.Map.of(
+                                ":transactionId", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder()
+                                        .s(transactionId).build()))
+                        .build()))
+                .items().stream().findFirst();
+    }
+
+    public void delete(KhataItem item) {
+        table.deleteItem(Key.builder()
+                .partitionValue(item.getPk())
+                .sortValue(item.getSk())
+                .build());
     }
 }
