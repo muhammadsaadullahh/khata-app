@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      AWS_REGION: ${AWS_REGION:-eu-north-1}
+      AWS_DYNAMODB_TABLE_NAME: ${AWS_DYNAMODB_TABLE_NAME:-Khataapp}
+      AWS_DYNAMODB_ENDPOINT: ${AWS_DYNAMODB_ENDPOINT:-http://dynamodb-local:8000}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-3600000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      SERVER_PORT: 8080
+    depends_on:
+      dynamodb-local:
+        condition: service_started
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - "8000:8000"
