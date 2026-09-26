@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: khata-app
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+aws:
+  region: ${AWS_REGION:eu-north-1}
+  dynamodb:
+    table-name: ${AWS_DYNAMODB_TABLE_NAME:Khataapp}
+    endpoint: ${AWS_DYNAMODB_ENDPOINT:}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:local-development-secret-change-this-value-please-32-bytes}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
+logging:
+  level:
+    root: INFO
+    com.khataapp: INFO
