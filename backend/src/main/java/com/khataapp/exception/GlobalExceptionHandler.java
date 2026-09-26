@@ -13,6 +13,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail validation(MethodArgumentNotValidException ex) {
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request validation failed");
+        detail.setTitle("Validation error");
+        detail.setType(java.net.URI.create("https://khata.app/problems/validation"));
         detail.setProperty("errors", ex.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(e -> e.getField(), e -> e.getDefaultMessage(), (a, b) -> a)));
         return detail;

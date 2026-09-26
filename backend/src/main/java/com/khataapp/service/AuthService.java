@@ -46,7 +46,17 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setEmail(request.email().trim().toLowerCase(Locale.ROOT));
         user.setCreatedAt(createdAt);
+        user.setCurrency(request.currency() == null || request.currency().isBlank() ? "INR" : request.currency().toUpperCase(Locale.ROOT));
+        user.setRole(repository.hasUsers() ? "USER" : "OWNER");
         repository.saveUser(user);
+        for (String category : new String[]{"Food", "Travel", "Bills", "Shopping", "Other"}) {
+            KhataItem item = new KhataItem();
+            item.setPk(user.getPk()); item.setSk("CATEGORY#" + UUID.randomUUID());
+            item.setItemType(ItemType.CATEGORY.name()); item.setUserId(userId);
+            item.setCategoryId(item.getSk().substring("CATEGORY#".length()));
+            item.setCategory(category); item.setSystemCategory(true);
+            repository.save(item);
+        }
         return new AuthResponse(jwtService.generateToken(userId), toResponse(user));
     }
 
@@ -62,7 +72,7 @@ public class AuthService {
 
     private UserResponse toResponse(KhataItem user) {
         return new UserResponse(user.getUserId(), user.getFullName(), user.getUsername(),
-                user.getEmail(), user.getCreatedAt());
+                user.getEmail(), user.getCreatedAt(), user.getCurrency() == null ? "INR" : user.getCurrency(), user.getRole() == null ? "USER" : user.getRole());
     }
 
     private String normalize(String value) {

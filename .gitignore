@@ -31,6 +31,9 @@ target/
 /.nb-gradle/
 build/
 **/build/
+node_modules/
+**/node_modules/
+**/dist/
 
 # Environment & Secrets
 .env

@@ -10,6 +10,11 @@ public record RegisterRequest(
         @NotBlank @Size(min = 3, max = 50)
         @Pattern(regexp = "^[a-zA-Z0-9._-]+$", message = "Username contains invalid characters")
         String username,
-        @NotBlank @Size(min = 8, max = 72) String password,
-        @NotBlank @Email @Size(max = 254) String email) {
+        @NotBlank @Size(min = 8, max = 72)
+        @Pattern(regexp = "^(?=\\S{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).*$",
+                message = "Password must be 8-72 characters and include uppercase, lowercase, number, and special character")
+        String password,
+        @NotBlank @Email @Size(max = 254) String email,
+        @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a valid 3-letter ISO 4217 code")
+        String currency) {
 }

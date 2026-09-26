@@ -22,6 +22,10 @@ public class KhataItem {
     private String username;
     private String passwordHash;
     private String email;
+    private String currency;
+    private String role;
+    private String categoryId;
+    private Boolean systemCategory;
     private String transactionId;
     private String partyName;
     private String transactionType;

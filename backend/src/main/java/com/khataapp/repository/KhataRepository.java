@@ -12,6 +12,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 import java.util.List;
 import java.util.Optional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 @Repository
 public class KhataRepository {
@@ -25,6 +26,15 @@ public class KhataRepository {
     public KhataItem save(KhataItem item) {
         table.putItem(item);
         return item;
+    }
+
+    public boolean hasUsers() {
+        return table.scan().items().stream().anyMatch(i -> ItemType.USER.name().equals(i.getItemType()));
+    }
+
+    public List<KhataItem> findCategories(String userId) {
+        return table.query(r -> r.queryConditional(QueryConditional.sortBeginsWith(
+                Key.builder().partitionValue("USER#" + userId).sortValue("CATEGORY#").build()))).items().stream().toList();
     }
 
     public KhataItem saveUser(KhataItem user) {
@@ -44,6 +54,17 @@ public class KhataRepository {
         }
         table.putItem(user);
         return user;
+    }
+
+    public void saveUsernameLookup(String username, String userId) {
+        KhataItem lookup = new KhataItem();
+        lookup.setPk("USERNAME#" + username); lookup.setSk("USER");
+        lookup.setItemType(ItemType.USER_LOOKUP.name()); lookup.setUserId(userId); lookup.setUsername(username);
+        try {
+            table.putItem(r -> r.item(lookup).conditionExpression(Expression.builder().expression("attribute_not_exists(PK)").build()));
+        } catch (ConditionalCheckFailedException ex) {
+            throw new com.khataapp.exception.ConflictException("Username is already registered");
+        }
     }
 
     public Optional<KhataItem> findUserByUsername(String username) {
