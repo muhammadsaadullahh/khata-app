@@ -1,40 +1,13 @@
-# Daily Khata App API
+# Khata
 
-Spring Boot 3 and Java 17 REST API using AWS DynamoDB single-table design.
+Khata is a multilingual household ledger with a Spring Boot/DynamoDB API and a Vite React frontend.
 
-## Local run against AWS DynamoDB
+## Local development
 
-Configure AWS credentials with the AWS CLI, then set the variables from `.env.example`
-in the PowerShell session before starting the application:
+1. Copy `backend/.env.example` and `frontend/.env.example` to local environment files; provide a 256-bit JWT secret and DynamoDB table settings. Never commit passwords or secrets.
+2. Start the API with `cd backend; .\mvnw.cmd spring-boot:run`.
+3. Start the UI with `cd frontend; npm install; npm run dev`.
 
-```powershell
-$env:AWS_REGION="eu-north-1"
-$env:AWS_DYNAMODB_TABLE_NAME="Khataapp"
-$env:AWS_DYNAMODB_ENDPOINT=""
-$env:JWT_SECRET="use-a-random-secret-at-least-32-bytes"
-$env:JWT_EXPIRATION_MS="3600000"
-$env:CORS_ALLOWED_ORIGINS="http://localhost:3000,http://localhost:5173"
-$env:SERVER_PORT="8080"
-.\mvnw.cmd spring-boot:run
-```
+The API persists users, transactions, and per-household categories in DynamoDB. Category defaults are seeded at registration. Profile updates are authenticated and logout requires confirmation. Language and RTL preferences are stored in browser local storage.
 
-Never commit `.env` or cloud credentials. In App Runner, provide `JWT_SECRET`
-through a secret and use the instance role for DynamoDB access.
-
-## API endpoints
-
-All khata endpoints require a bearer token from login.
-
-```text
-POST   /api/v1/auth/register
-POST   /api/v1/auth/login
-POST   /api/v1/khata
-GET    /api/v1/khata/{userId}
-GET    /api/v1/khata/{userId}/summary
-DELETE /api/v1/khata/{userId}/{transactionId}
-GET    /actuator/health
-```
-
-Transaction creation derives the owner from the JWT; clients must not send a
-`userId` in the request body. DELETE also verifies that the path user ID matches
-the authenticated user.
+For deployment, set `APP_CORS_ALLOWED_ORIGINS`, AWS region/table credentials, and `SECURITY_JWT_SECRET` in the hosting platform; use HTTPS and least-privilege IAM permissions.
