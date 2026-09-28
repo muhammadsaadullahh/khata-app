@@ -14,7 +14,9 @@ public record RegisterRequest(
         @Pattern(regexp = "^(?=\\S{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).*$",
                 message = "Password must be 8-72 characters and include uppercase, lowercase, number, and special character")
         String password,
-        @NotBlank @Email @Size(max = 254) String email,
+        @NotBlank @Email @Size(max = 254)
+        @Pattern(regexp = "^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$",
+                message = "Email must be a valid address") String email,
         @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a valid 3-letter ISO 4217 code")
         String currency) {
 }

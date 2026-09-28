@@ -29,6 +29,16 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
+        String role = repository.hasUsers() ? "USER" : "OWNER";
+        KhataItem user = createUser(request, role);
+        return new AuthResponse(jwtService.generateToken(user.getUserId()), toResponse(user));
+    }
+
+    public UserResponse createManagedUser(RegisterRequest request, String role) {
+        return toResponse(createUser(request, role));
+    }
+
+    private KhataItem createUser(RegisterRequest request, String role) {
         String username = normalize(request.username());
         if (repository.findUserByUsername(username).isPresent()) {
             throw new ConflictException("Username is already registered");
@@ -47,7 +57,7 @@ public class AuthService {
         user.setEmail(request.email().trim().toLowerCase(Locale.ROOT));
         user.setCreatedAt(createdAt);
         user.setCurrency(request.currency() == null || request.currency().isBlank() ? "INR" : request.currency().toUpperCase(Locale.ROOT));
-        user.setRole(repository.hasUsers() ? "USER" : "OWNER");
+        user.setRole(role);
         repository.saveUser(user);
         for (String category : new String[]{"Food", "Travel", "Bills", "Shopping", "Other"}) {
             KhataItem item = new KhataItem();
@@ -57,7 +67,7 @@ public class AuthService {
             item.setCategory(category); item.setSystemCategory(true);
             repository.save(item);
         }
-        return new AuthResponse(jwtService.generateToken(userId), toResponse(user));
+        return user;
     }
 
     public AuthResponse login(LoginRequest request) {

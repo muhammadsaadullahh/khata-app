@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -31,8 +32,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String subject = jwtService.subject(header.substring(7));
                 if (subject != null && !subject.isBlank() && repository.findUserById(subject).isPresent()) {
+                    String role = repository.findUserById(subject).map(com.khataapp.model.KhataItem::getRole).orElse("USER");
                     SecurityContextHolder.getContext().setAuthentication(
-                            new UsernamePasswordAuthenticationToken(subject, null, Collections.emptyList()));
+                            new UsernamePasswordAuthenticationToken(subject, null,
+                                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))));
                 }
             } catch (ExpiredJwtException ex) {
                 SecurityContextHolder.clearContext();

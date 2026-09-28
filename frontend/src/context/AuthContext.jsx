@@ -15,7 +15,7 @@ function readUser() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readUser);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   const saveSession = (data) => {
     localStorage.setItem(TOKEN_KEY, data.token);
@@ -50,8 +50,8 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
-    if (!window.confirm('Are you sure you want to log out?')) return;
+  const logout = async () => {
+    if (!await confirm('Log out of Khata?', 'Your current session will be ended on this device.')) return;
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem('khata_user');
     setUser(null);
@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
     const { data } = await authApi.updateProfile(payload);
     localStorage.setItem('khata_user', JSON.stringify(data)); setUser(data); return data;
   };
-  const value = useMemo(() => ({ user, loading, login, register, updatePreferences, updateProfile, logout }), [user, loading]);
+  const value = useMemo(() => ({ user, loading, login, register, updatePreferences, updateProfile, logout }), [user, loading, confirm]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
