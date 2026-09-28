@@ -1,0 +1,74 @@
+# Deployment guide
+
+The production layout uses an EC2 instance for the Spring Boot API and an S3
+static website bucket for the React frontend. The EC2 instance should have an
+IAM role granting access to the Khata DynamoDB table; the AWS SDK uses that
+role through `DefaultCredentialsProvider`. Environment credentials are only a
+local fallback.
+
+## Backend on EC2
+
+1. Create the DynamoDB table and an IAM role with least-privilege access to
+   that table. Attach the role to the EC2 instance through an instance profile.
+2. Install Docker and the Compose plugin, then clone the repository:
+
+   ```bash
+   git clone <repository-url> khata-app
+   cd khata-app/backend
+   ```
+
+3. Create the production environment file:
+
+   ```bash
+   cp .env.example .env
+   nano .env
+   ```
+
+   Set `AWS_REGION`, `AWS_DYNAMODB_TABLE_NAME`, a strong `JWT_SECRET`,
+   `SPRING_PROFILES_ACTIVE=prod`, and `CORS_ALLOWED_ORIGINS` to the exact S3
+   website or CloudFront origin, for example `https://www.example.com`. Set
+   `AWS_DYNAMODB_ENDPOINT=` so the application uses AWS DynamoDB rather than
+   local DynamoDB. Do not add access keys when the EC2 IAM role is attached. The optional
+   `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`
+   variables are only for local fallback/testing.
+
+4. Start the backend:
+
+   ```bash
+   docker compose up -d --build
+   docker compose ps
+   curl http://localhost:8080/actuator/health
+   ```
+
+   Restrict port `8080` with the EC2 security group or place it behind a TLS
+   reverse proxy. View logs with `docker compose logs -f backend`.
+
+## Frontend on S3
+
+1. Configure the API URL before building:
+
+   ```bash
+   cd ../frontend
+   cp .env.example .env
+   # Set VITE_API_BASE_URL=https://<ec2-api-or-domain>/api/v1
+   npm ci
+   npm run build
+   ```
+
+2. Configure an S3 bucket for static website hosting and set `index.html` as
+   both the index and error document for client-side routing.
+3. Upload the generated assets:
+
+   ```bash
+   aws s3 sync dist s3://<bucket-name> --delete
+   ```
+
+4. Add the final S3 website or CloudFront origin to
+   `CORS_ALLOWED_ORIGINS`, then restart the backend:
+
+   ```bash
+   cd ../backend
+   docker compose up -d
+   ```
+
+Never commit `.env` files, access keys, private keys, or JWT secrets.
