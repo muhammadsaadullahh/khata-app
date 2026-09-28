@@ -6,7 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Transactions from './pages/Transactions';
 import Settings from './pages/Settings';
+import AdminUsers from './pages/AdminUsers';
 
 export default function App() {
-  return <Routes><Route path="/login" element={<Login />} /><Route path="/register" element={<Register />} /><Route element={<ProtectedRoute />}><Route element={<AppShell />}><Route path="/dashboard" element={<Dashboard />} /><Route path="/transactions" element={<Transactions />} /><Route path="/settings" element={<Settings />} /></Route></Route><Route path="*" element={<Navigate to="/dashboard" replace />} /></Routes>;
+  return <Routes><Route path="/login" element={<Login />} /><Route path="/register" element={<Register />} /><Route element={<ProtectedRoute />}><Route element={<AppShell />}><Route path="/dashboard" element={<Dashboard />} /><Route path="/transactions" element={<Transactions />} /><Route path="/settings" element={<Settings />} /><Route path="/admin/users" element={<AdminUsers />} /></Route></Route><Route path="*" element={<Navigate to="/dashboard" replace />} /></Routes>;
 }

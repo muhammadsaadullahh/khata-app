@@ -17,6 +17,9 @@ public class ProfileService {
     public ProfileService(KhataRepository repository, PasswordEncoder encoder) { this.repository = repository; this.encoder = encoder; }
     public UserResponse update(String id, ProfileUpdateRequest request) {
         KhataItem user = repository.findUserById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        if ("DEMO".equalsIgnoreCase(user.getRole())) {
+            throw new ConflictException("Demo accounts can only update currency");
+        }
         if (request.username() != null && !request.username().isBlank() && !request.username().equalsIgnoreCase(user.getUsername())
                 && repository.findUserByUsername(request.username().trim().toLowerCase(Locale.ROOT)).isPresent())
             throw new ConflictException("Username is already registered");

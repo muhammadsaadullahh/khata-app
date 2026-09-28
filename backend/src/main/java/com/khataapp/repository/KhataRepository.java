@@ -12,6 +12,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 @Repository
@@ -30,6 +31,12 @@ public class KhataRepository {
 
     public boolean hasUsers() {
         return table.scan().items().stream().anyMatch(i -> ItemType.USER.name().equals(i.getItemType()));
+    }
+
+    public List<KhataItem> findUsers() {
+        return table.scan().items().stream()
+                .filter(item -> ItemType.USER.name().equals(item.getItemType()))
+                .toList();
     }
 
     public List<KhataItem> findCategories(String userId) {
@@ -91,6 +98,15 @@ public class KhataRepository {
                         software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.sortBeginsWith(
                                 Key.builder().partitionValue("USER#" + userId).sortValue("TXN#").build())))
                 .items().stream()
+                .toList();
+    }
+
+    public List<KhataItem> findTransactionsByUserIdAndDateRange(String userId, LocalDate from, LocalDate to) {
+        return findTransactionsByUserId(userId).stream()
+                .filter(item -> {
+                    LocalDate date = LocalDate.parse(item.getCreatedAt().substring(0, 10));
+                    return !date.isBefore(from) && !date.isAfter(to);
+                })
                 .toList();
     }
 
