@@ -78,8 +78,8 @@ cd ..\frontend
 npm.cmd run build
 ```
 
-Never commit `.env` files or cloud credentials. In App Runner, provide
-`JWT_SECRET` through a secret and use the instance role for DynamoDB access.
+Never commit `.env` files or cloud credentials. On EC2, provide
+`JWT_SECRET` through `/etc/khata/khata.env` and use the instance role for DynamoDB access.
 
 ## API endpoints
 

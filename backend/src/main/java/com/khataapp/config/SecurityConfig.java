@@ -75,6 +75,9 @@ public class SecurityConfig {
                 .map(String::trim)
                 .filter(origin -> !origin.isBlank())
                 .toList();
+        if (origins.isEmpty()) {
+            origins = List.of("http://localhost:5173", "http://localhost:3000");
+        }
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
