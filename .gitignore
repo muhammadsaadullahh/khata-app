@@ -1,20 +1,10 @@
-# Build output
+HELP.md
 target/
-**/target/
-*.class
-
-# Maven wrapper downloads
 .mvn/wrapper/maven-wrapper.jar
-**/.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# IDE metadata
-.idea/
-*.iws
-*.iml
-*.ipr
-.vscode/
-
-# Eclipse / Spring Tool Suite
+### STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -23,22 +13,27 @@ target/
 .springBeans
 .sts4-cache
 
-# NetBeans
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 build/
-**/build/
-node_modules/
-**/node_modules/
-**/dist/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
 
 # Environment & Secrets
 .env
-**/.env
 *.pem
 *.key
 application-local.properties
-**/application-local.properties
