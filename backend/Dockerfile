@@ -6,7 +6,7 @@ COPY src ./src
 RUN MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=128m" mvn -q clean package -DskipTests && cp target/khata-app-0.0.1-SNAPSHOT.jar /app/app.jar
 
 # Run Stage
-FROM eclipse-temurin-17-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/app.jar app.jar
 RUN addgroup -S spring && adduser -S spring -G spring
