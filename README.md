@@ -2,8 +2,6 @@
 
 Khata is a production-oriented multilingual household expense tracker with a Spring Boot/DynamoDB API and a Vite React frontend.
 
-This is a private, proprietary repository. No open-source license or redistribution permission is granted.
-
 ## Features
 
 - JWT authentication with protected, user-scoped transaction APIs

@@ -50,7 +50,7 @@ local fallback.
    ```bash
    cd ../frontend
    cp .env.example .env
-   # Set VITE_API_BASE_URL=https://<ec2-api-or-domain>/api/v1
+   # For the same CloudFront distribution serving /api/*, use VITE_API_BASE_URL=/api/v1
    npm ci
    npm run build
    ```
@@ -72,3 +72,17 @@ local fallback.
    ```
 
 Never commit `.env` files, access keys, private keys, or JWT secrets.
+
+## HTTPS with CloudFront
+
+Create one CloudFront distribution with two origins and two behaviors:
+
+- Default behavior `/` -> the S3 website endpoint, using HTTP-only origin protocol.
+- `/api/*` -> the EC2 public DNS/IP on port `8080`, using HTTP-only origin protocol.
+
+For `/api/*`, allow `GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE`, disable
+caching, and forward query strings and the `Authorization` header. Set the
+frontend `VITE_API_BASE_URL=/api/v1`, rebuild, upload `dist/` to S3, and set
+the backend `CORS_ALLOWED_ORIGINS` to the CloudFront HTTPS domain. The browser
+then uses HTTPS for both the static frontend and API while the CloudFront
+origins can remain HTTP.
