@@ -25,8 +25,8 @@ local fallback.
    ```
 
    Set `AWS_REGION`, `AWS_DYNAMODB_TABLE_NAME`, a strong `JWT_SECRET`,
-   `SPRING_PROFILES_ACTIVE=prod`, and `CORS_ALLOWED_ORIGINS` to the exact S3
-   website or CloudFront origin, for example `https://www.example.com`. Set
+   `SPRING_PROFILES_ACTIVE=prod`, and `CORS_ALLOWED_ORIGINS` to the exact
+   CloudFront origin, for example `https://d123example.cloudfront.net`. Set
    `AWS_DYNAMODB_ENDPOINT=` so the application uses AWS DynamoDB rather than
    local DynamoDB. Do not add access keys when the EC2 IAM role is attached. The optional
    `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`
@@ -63,8 +63,8 @@ local fallback.
    aws s3 sync dist s3://<bucket-name> --delete
    ```
 
-4. Add the final S3 website or CloudFront origin to
-   `CORS_ALLOWED_ORIGINS`, then restart the backend:
+4. Add the final CloudFront origin to `CORS_ALLOWED_ORIGINS`, then restart the
+   backend:
 
    ```bash
    cd ../backend
