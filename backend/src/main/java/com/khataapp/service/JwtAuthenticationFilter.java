@@ -39,6 +39,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (ExpiredJwtException ex) {
                 SecurityContextHolder.clearContext();
+                if (request.getRequestURI().startsWith("/api/v1/auth/")) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/problem+json");
                 response.getWriter().write(

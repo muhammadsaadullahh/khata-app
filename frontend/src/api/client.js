@@ -10,7 +10,10 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY);
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const isPublicAuthRequest = config.url?.startsWith('/auth/');
+  if (token && !isPublicAuthRequest) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -20,7 +23,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem('khata_user');
-      if (!window.location.pathname.startsWith('/login')) window.location.assign('/login?expired=true');
+      if (window.location.hash !== '#/login?expired=true') {
+        window.location.assign('/#/login?expired=true');
+      }
     }
     return Promise.reject(error);
   },
