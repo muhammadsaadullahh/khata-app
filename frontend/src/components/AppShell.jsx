@@ -21,7 +21,7 @@ export default function AppShell() {
           <NavLink to="/dashboard" onClick={() => setOpen(false)}><i className="bi bi-grid-1x2-fill" /> {t('overview')}</NavLink>
           <NavLink to="/transactions" onClick={() => setOpen(false)}><i className="bi bi-arrow-left-right" /> {t('transactions')}</NavLink>
           <NavLink to="/settings" onClick={() => setOpen(false)}><i className="bi bi-gear" /> {t('settings')} <span className="modern-badge">NEW</span></NavLink>
-          {['OWNER', 'ADMIN'].includes(user?.role) && <NavLink to="/admin/users" onClick={() => setOpen(false)}><i className="bi bi-people" /> User control</NavLink>}
+          {['OWNER', 'ADMIN'].includes(user?.role) && <NavLink to="/admin/users" onClick={() => setOpen(false)}><i className="bi bi-people" /> {t('userControl')}</NavLink>}
         </nav>
         <div className="sidebar-bottom">
           <div className="user-chip"><span className="avatar">{user?.fullName?.charAt(0).toUpperCase()}</span><span className="text-truncate"><strong>{user?.fullName}</strong><small>@{user?.username}</small></span></div>
@@ -32,7 +32,7 @@ export default function AppShell() {
       <main className="main-content">
         <header className="topbar">
           <button className="menu-button" onClick={() => setOpen(true)} aria-label="Open menu"><i className="bi bi-list" /></button>
-          <div><p className="eyebrow">Your khata</p><h1>{pageTitle}</h1></div>
+          <div><p className="eyebrow">{t('yourKhata')}</p><h1>{pageTitle}</h1></div>
           <div className="topbar-actions"><button className="theme-button" onClick={() => setDark((value) => !value)} aria-label="Toggle dark mode"><i className={`bi ${dark ? 'bi-sun' : 'bi-moon'}`} /></button><div className="topbar-avatar">{user?.fullName?.charAt(0).toUpperCase()}</div></div>
         </header>
         <div className="content-container"><Outlet /></div>
