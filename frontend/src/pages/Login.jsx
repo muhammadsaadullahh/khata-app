@@ -29,11 +29,11 @@ export default function Login() {
       setError(getApiError(err));
     }
   };
-  return <AuthLayout><p className="eyebrow">{t('welcome')}</p><h1>Good to see you.</h1><p className="auth-subtitle">Keep your money conversations clear and your records close.</p>{sessionExpired && <div className="info-alert">Your session expired. Please log in again.</div>}{location.state?.registered && <div className="info-alert">Account created successfully. Please sign in.</div>}{error && <div className="form-error">{error}</div>}<form onSubmit={submit} className="auth-form">
-    <label>Username<input value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} placeholder="your username" maxLength="50" autoComplete="username" /></label>
-    <label>Password<div className="password-field"><input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Your password" maxLength="72" autoComplete="current-password" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}><i className={`bi bi-eye${showPassword ? '-slash' : ''}`} /></button></div></label>
-    <button className="button-primary w-100" disabled={loading}>{loading ? 'Signing in...' : 'Sign in'} <i className="bi bi-arrow-right" /></button>
-  </form><p className="auth-switch">New to Khata? <Link to="/register">Create an account</Link></p></AuthLayout>;
+  return <AuthLayout><p className="eyebrow">{t('welcome')}</p><h1>{t('goodToSeeYou')}</h1><p className="auth-subtitle">{t('loginSubtitle')}</p>{sessionExpired && <div className="info-alert">Your session expired. Please log in again.</div>}{location.state?.registered && <div className="info-alert">Account created successfully. Please sign in.</div>}{error && <div className="form-error">{error}</div>}<form onSubmit={submit} className="auth-form">
+    <label>{t('username')}<input value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} placeholder={t('username')} maxLength="50" autoComplete="username" /></label>
+    <label>{t('password')}<div className="password-field"><input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={t('password')} maxLength="72" autoComplete="current-password" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}><i className={`bi bi-eye${showPassword ? '-slash' : ''}`} /></button></div></label>
+    <button className="button-primary w-100" disabled={loading}>{loading ? t('signingIn') : t('signIn')} <i className="bi bi-arrow-right" /></button>
+  </form><p className="auth-switch">{t('newToKhata')} <Link to="/register">{t('createAccountLink')}</Link></p></AuthLayout>;
 }
 
 function AuthLayout({ children }) {
